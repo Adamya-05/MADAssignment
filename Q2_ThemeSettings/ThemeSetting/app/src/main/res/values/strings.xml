@@ -1,3 +1,25 @@
 <resources>
-    <string name="app_name">ThemeSetting</string>
+    <string name="app_name">Length Unit Converter</string>
+    <string name="settings">Settings</string>
+    <string name="theme_settings">Appearance</string>
+    <string name="current_theme_light">Current theme: Light</string>
+    <string name="current_theme_dark">Current theme: Dark</string>
+    <string name="switch_to_dark">Switch to Dark Theme</string>
+    <string name="switch_to_light">Switch to Light Theme</string>
+    <string name="back_to_converter">Back to Converter</string>
+    <string name="app_settings">Settings</string>
+    
+    <!-- Unit Converter Strings -->
+    <string name="converter_title">Length Unit Converter</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="enter_value">Enter value</string>
+    <string name="result_default">0</string>
+    <string name="swap_units">Swap Units</string>
+    <string name="common_conversions">Common Conversions</string>
+    
+    <!-- Theme Settings -->
+    <string name="dark_mode">Dark Theme</string>
+    <string name="theme_description">Dark theme reduces battery usage and helps with eye strain in low light</string>
+    <string name="appearance">Appearance</string>
 </resources>

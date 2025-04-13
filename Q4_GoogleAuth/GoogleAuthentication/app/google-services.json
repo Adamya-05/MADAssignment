@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "501183599411",
+    "project_id": "authentication-bf62c",
+    "storage_bucket": "authentication-bf62c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:501183599411:android:62193fe6843c8e13bde446",
+        "android_client_info": {
+          "package_name": "com.adamya.googleauthentication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "501183599411-sample.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adamya.googleauthentication",
+            "certificate_hash": "sample_hash_replace_with_your_actual_sha1"
+          }
+        },
+        {
+          "client_id": "501183599411-sample_web.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVkB5GZ9PDEgE69O1trNljF9LIk5U9y6k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "501183599411-sample_web.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

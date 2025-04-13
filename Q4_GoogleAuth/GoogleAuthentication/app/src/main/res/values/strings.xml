@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">GoogleAuthentication</string>
+    <string name="title_google_auth">Welcome to App</string>
+    <string name="welcome_message">Welcome!</string>
+    <string name="logout">Sign Out</string>
+    <string name="login_subtitle">Sign in with your Google account to continue</string>
+    <string name="signed_in_status">You are now signed in</string>
 </resources>
