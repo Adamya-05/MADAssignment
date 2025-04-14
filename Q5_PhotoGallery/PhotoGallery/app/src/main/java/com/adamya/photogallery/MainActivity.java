@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -15,11 +16,15 @@ import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,8 +50,11 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        Button btnTakePhoto = findViewById(R.id.btnTakePhoto);
-        Button btnViewGallery = findViewById(R.id.btnViewGallery);
+        // Find views
+        MaterialButton btnTakePhoto = findViewById(R.id.btnTakePhoto);
+        MaterialButton btnViewGallery = findViewById(R.id.btnViewGallery);
+        CardView cameraCard = findViewById(R.id.cameraCard);
+        CardView galleryCard = findViewById(R.id.galleryCard);
 
         // Set up permission requests
         requestMultiplePermissionsLauncher = registerForActivityResult(
@@ -62,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                     if (allGranted) {
                         dispatchTakePictureIntent();
                     } else {
-                        Toast.makeText(this, "Permissions are required to take photos", Toast.LENGTH_SHORT).show();
+                        showSnackbar(getString(R.string.camera_permission_required));
                     }
                 });
 
@@ -71,37 +79,41 @@ public class MainActivity extends AppCompatActivity {
                 new ActivityResultContracts.TakePicture(),
                 success -> {
                     if (success) {
-                        Toast.makeText(this, "Photo saved successfully", Toast.LENGTH_SHORT).show();
+                        showSnackbar("Photo saved successfully");
                         // Notify gallery about new image
                         galleryAddPic();
                     } else {
-                        Toast.makeText(this, "Failed to save photo", Toast.LENGTH_SHORT).show();
+                        showSnackbar("Failed to save photo");
                     }
                 });
 
         // Set button click listeners
-        btnTakePhoto.setOnClickListener(v -> {
-            checkPermissionsAndTakePhoto();
-        });
+        View.OnClickListener cameraClickListener = v -> checkPermissionsAndTakePhoto();
+        btnTakePhoto.setOnClickListener(cameraClickListener);
+        cameraCard.setOnClickListener(cameraClickListener);
 
-        btnViewGallery.setOnClickListener(v -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                if (ContextCompat.checkSelfPermission(this, 
-                        Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-                    requestMultiplePermissionsLauncher.launch(new String[]{
-                            Manifest.permission.READ_MEDIA_IMAGES
-                    });
-                    return;
-                }
-            } else if (ContextCompat.checkSelfPermission(this, 
-                    Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        View.OnClickListener galleryClickListener = v -> openGallery();
+        btnViewGallery.setOnClickListener(galleryClickListener);
+        galleryCard.setOnClickListener(galleryClickListener);
+    }
+
+    private void openGallery() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, 
+                    Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
                 requestMultiplePermissionsLauncher.launch(new String[]{
-                        Manifest.permission.READ_EXTERNAL_STORAGE
+                        Manifest.permission.READ_MEDIA_IMAGES
                 });
                 return;
             }
-            startActivity(new Intent(MainActivity.this, GalleryActivity.class));
-        });
+        } else if (ContextCompat.checkSelfPermission(this, 
+                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestMultiplePermissionsLauncher.launch(new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+            });
+            return;
+        }
+        startActivity(new Intent(MainActivity.this, GalleryActivity.class));
     }
 
     private void checkPermissionsAndTakePhoto() {
@@ -155,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
             takePictureLauncher.launch(photoUri);
         } catch (IOException ex) {
             // Error occurred while creating the File
-            Toast.makeText(this, "Error creating image file", Toast.LENGTH_SHORT).show();
+            showSnackbar("Error creating image file");
         }
     }
 
@@ -165,5 +177,13 @@ public class MainActivity extends AppCompatActivity {
         Uri contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
+    }
+    
+    private void showSnackbar(String message) {
+        View rootView = findViewById(android.R.id.content);
+        Snackbar.make(rootView, message, Snackbar.LENGTH_LONG)
+                .setBackgroundTint(getResources().getColor(R.color.primary_dark, getTheme()))
+                .setTextColor(getResources().getColor(R.color.white, getTheme()))
+                .show();
     }
 }

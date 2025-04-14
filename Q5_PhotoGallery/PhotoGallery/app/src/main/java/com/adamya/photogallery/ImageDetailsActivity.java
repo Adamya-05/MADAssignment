@@ -1,10 +1,9 @@
 package com.adamya.photogallery;
 
 import android.os.Bundle;
-import android.widget.Button;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
@@ -14,6 +13,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 
@@ -21,7 +24,7 @@ public class ImageDetailsActivity extends AppCompatActivity {
 
     private ImageView ivDetailImage;
     private TextView tvImageName, tvImagePath, tvImageSize, tvImageDate;
-    private Button btnDeleteImage;
+    private MaterialButton btnDeleteImage;
     private ImageModel imageModel;
 
     @Override
@@ -42,27 +45,33 @@ public class ImageDetailsActivity extends AppCompatActivity {
         tvImageSize = findViewById(R.id.tvImageSize);
         tvImageDate = findViewById(R.id.tvImageDate);
         btnDeleteImage = findViewById(R.id.btnDeleteImage);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        
+        // Set up toolbar
+        toolbar.setNavigationOnClickListener(v -> finish());
 
         // Get image data from intent
         if (getIntent().hasExtra("image")) {
             imageModel = (ImageModel) getIntent().getSerializableExtra("image");
             displayImageDetails();
+            // Set toolbar title to image name
+            toolbar.setTitle(imageModel.getName());
         } else {
-            Toast.makeText(this, "Error: No image data found", Toast.LENGTH_SHORT).show();
+            showSnackbar("Error: No image data found");
             finish();
             return;
         }
 
         // Set up delete button
-        btnDeleteImage.setOnClickListener(v -> {
-            confirmAndDeleteImage();
-        });
+        btnDeleteImage.setOnClickListener(v -> confirmAndDeleteImage());
     }
 
     private void displayImageDetails() {
-        // Load image with Glide
+        // Load image with Glide with improved loading
         Glide.with(this)
                 .load(imageModel.getUri())
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .centerCrop()
                 .into(ivDetailImage);
 
         // Set text details
@@ -74,12 +83,11 @@ public class ImageDetailsActivity extends AppCompatActivity {
 
     private void confirmAndDeleteImage() {
         new AlertDialog.Builder(this)
-                .setTitle("Delete Image")
-                .setMessage("Are you sure you want to delete this image? This action cannot be undone.")
-                .setPositiveButton("Delete", (dialog, which) -> {
-                    deleteImage();
-                })
-                .setNegativeButton("Cancel", null)
+                .setTitle(getString(R.string.delete_confirmation_title))
+                .setMessage(getString(R.string.delete_confirmation))
+                .setPositiveButton(getString(R.string.yes), (dialog, which) -> deleteImage())
+                .setNegativeButton(getString(R.string.no), null)
+                .create()
                 .show();
     }
 
@@ -88,20 +96,33 @@ public class ImageDetailsActivity extends AppCompatActivity {
         if (file.exists()) {
             boolean deleted = file.delete();
             if (deleted) {
-                // Notify the MediaStore about the deletion
-                getContentResolver().delete(
-                        imageModel.getUri(),
-                        null,
-                        null
-                );
-                Toast.makeText(this, "Image deleted successfully", Toast.LENGTH_SHORT).show();
+                try {
+                    // Notify the MediaStore about the deletion
+                    getContentResolver().delete(
+                            imageModel.getUri(),
+                            null,
+                            null
+                    );
+                } catch (Exception e) {
+                    // Continue even if MediaStore update fails
+                }
+                
+                showSnackbar(getString(R.string.image_deleted));
                 finish(); // Return to gallery
             } else {
-                Toast.makeText(this, "Failed to delete image", Toast.LENGTH_SHORT).show();
+                showSnackbar("Failed to delete image. Check app permissions.");
             }
         } else {
-            Toast.makeText(this, "Image no longer exists", Toast.LENGTH_SHORT).show();
+            showSnackbar("Image no longer exists");
             finish();
         }
+    }
+    
+    private void showSnackbar(String message) {
+        View rootView = findViewById(android.R.id.content);
+        Snackbar.make(rootView, message, Snackbar.LENGTH_LONG)
+                .setBackgroundTint(getResources().getColor(R.color.primary_dark, getTheme()))
+                .setTextColor(getResources().getColor(R.color.white, getTheme()))
+                .show();
     }
 } 
